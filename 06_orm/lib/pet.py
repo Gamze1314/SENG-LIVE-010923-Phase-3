@@ -13,7 +13,7 @@ CONN = sqlite3.connect('lib/resources.db')
 # https://docs.python.org/3/library/sqlite3.html#sqlite3.Cursor
 CURSOR = CONN.cursor()
 
-
+# we first need to create classes before persisting data to database.
 
 class Pet:
     
@@ -52,14 +52,13 @@ class Pet:
 
     # ✅ 4. Add "save" Instance Method to Persist New "pet" Instances to DB
 
-    def save(self):
-        #SQL SYNTAX FOR INSERTING INTO TABLE
+    def save(self):  # insert new record into database
         sql = """
             INSERT INTO pets (name, species, breed, temperament)
             VALUES (?,?,?,?)
         """
 
-        #USE CURSOR TO EXECUTE SQL, execute accepts second parameter(values)
+        #USE CURSOR to execute sql, and pass values in tuple to database
         CURSOR.execute(sql, (self.name, self.species, self.breed, self.temperament))
 
         #COMMIT TO DB
@@ -68,64 +67,60 @@ class Pet:
     # ✅ 5. Add "create" Class Method to Initialize and Save New "pet" Instances to DB
 
     #repeated Action that we are abstracting out into "create"
-
     @classmethod
     def create(cls, name, species, breed, temperament):
 
-        # __init__ method is firing off 
-        #you can use cls or Pet word to create a new instance
+#instantiate the pets here __init__ method firing off.
         pet = cls(name, species, breed, temperament)
         pet.save() # we are referring back to save method here.
         return pet
+
+
 
     # ✅ 6. Add "new_from_db" Class Method to Retrieve Newest "pet" Instance w/ Attributes From DB
     @classmethod
     def new_from_db(cls, row):
         #reinstantiating class; takes the row and pulls the id from db and pass that as value.
+
+        #row is tuple, we are pulling the values from the database when we reinstantiate the class.
         pet = cls(
-            name = row[1],
-            species = row[2],
-            breed = row[3],
-            temperament = row[4],
-            id = row[0]
+            name=row[1],
+            species=row[2],
+            breed=row[3],
+            temperament=row[4],
+            id=row[0]
         )
 
         return pet
 
+
     # ✅ 7. Add "get_all" Class Method to Retrieve All "pet" Instances From DB
     @classmethod
     def get_all(cls):
-        sql = """SELECT * FROM pets"""
+        sql = """
+            SELECT * FROM pets
+            """
 
-        #cls.new_from_db(row) is being fired off for every row.
-        return [cls.new_from_db(row) for row in CURSOR.execute(sql).fetchall()]
-
+        return [cls.new_from_db(row) for row in CURSOR.execute(sql).fetchall()] #what does return to us from fetchall(), => returns a list of tuples.
 
     # ✅ 8. Add "find_by_name" Class Method to Retrieve "pet" Instance by "name" Attribute From DB
 
         # If No "pet" Found, return "None"
 
     @classmethod
-    def find_by_name(cls, name):
+    def find_by_name(cls, name): #find the matching name in the database.
         sql = """ SELECT * from pets 
         WHERE name = ?
         LIMIT 1
         """
 
-        row = CURSOR.execute(sql, (name, )).fetchone() #1 row will be returned
+        row = CURSOR.execute(sql, (name, )).fetchone() #1 row will be returned(tuple)
 
         #return None if no row is found
         if not row:
             return None
-        #otherwise instantiate Pet class with tuple values and return that instance. we are going back and forth w database.
+        #otherwise instantiate Pet class with tuple values and return that instance.
         return Pet.new_from_db(row)
-    # or  => Pet(
-    #         id = row[0],
-    #         name = row[1],
-    #         species = row[2],
-    #         breed = row[3],
-    #         temperament = row[4]
-    #     )
 
 
     # ✅ 9. Add "find_by_id" Class Method to Retrieve "pet" Instance by "id" Attribute From DB => more likely to be used as callback

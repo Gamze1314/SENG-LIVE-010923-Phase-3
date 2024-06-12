@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from owner import Owner, CONN, CURSOR
+# from owner import Owner, CONN, CURSOR
 from pet import Pet, CONN, CURSOR
 
 
@@ -10,6 +10,6 @@ from pet import Pet, CONN, CURSOR
 
 # Pet.create_table()
 spot = Pet("spot", "dog", "chihuahua", "feisty")
-# spot.save()
+spot.save()
 
-import ipdb;ipdb.set_trace()
+import ipdb; ipdb.set_trace()
